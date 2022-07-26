@@ -3513,6 +3513,21 @@ cdef class VariantRecordSample(object):
     def phased(self, value):
         bcf_sample_set_phased(self, value)
 
+    @property
+    def non_none_alleles(self):
+        """ Returns a tuple containing all alleles which are not None """
+        return tuple( (a for a in self.alleles if a is not None) )
+
+    @property
+    def is_homozygous(self):
+        """True if the variant is Homozygous (Two identical alleles), False otherwise"""
+        return len(self.non_none_alleles)==2 and len(set(self.non_none_alleles))==1
+
+    @property
+    def is_heterozygous(self):
+        """True if the variant is Heterozygous (At two different alleles), False otherwise"""
+        return len(self.non_none_alleles)==2 and len(set(self.non_none_alleles))==2
+
     def __len__(self):
         cdef bcf_hdr_t *hdr = self.record.header.ptr
         cdef bcf1_t *r = self.record.ptr
